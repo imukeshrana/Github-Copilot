@@ -54,7 +54,6 @@ def get_activities():
 
 @app.post("/activities/{activity_name}/signup")
 def signup_for_activity(activity_name: str, email: str):
-
     """Sign up a student for an activity"""
     # Validate activity exists
     if activity_name not in activities:
@@ -62,6 +61,14 @@ def signup_for_activity(activity_name: str, email: str):
 
     # Get the specific activity
     activity = activities[activity_name]
+
+    # Validate not already signed up
+    if email in activity["participants"]:
+        raise HTTPException(status_code=400, detail="Student already registered for this activity")
+
+    # Validate capacity
+    if len(activity["participants"]) >= activity.get("max_participants", float("inf")):
+        raise HTTPException(status_code=400, detail="Activity is already full")
 
     # Add student
     activity["participants"].append(email)
